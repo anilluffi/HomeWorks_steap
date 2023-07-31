@@ -24,7 +24,7 @@ namespace WpfAppSql
                     // Получаем список всех таблиц в базе данных
                     DataTable tablesSchema = conn.GetSchema("Tables");
 
-                    // Создаем список для хранения имен таблиц, добавляем пустой элемент в начало списка
+                    // Создаем список для хранения имен таблиц
                     List<string> tableNames = new List<string> { };
 
                     // Добавляем имена таблиц в список
@@ -42,7 +42,6 @@ namespace WpfAppSql
             }
             catch (Exception ex)
             {
-                // Обработка ошибок подключения или запроса
                 Debug.WriteLine("error: " + ex.Message);
             }
         }
@@ -51,7 +50,8 @@ namespace WpfAppSql
             try
             {
                 await Connection.OpenAsync();
-                // Очистка DataSet и DataGrid перед заполнением новыми данными
+                
+                // Очистка 
                 dataGrid.Columns.Clear();
                 dataSet.Clear();
                 dataGrid.ItemsSource = null;
@@ -128,7 +128,7 @@ namespace WpfAppSql
         {
             if (TableName == "users")
             {
-                // Задание текста SQL-запроса для обновления данных в базе данных
+                // инициализация текста SQL-запроса для обновления данных в базе данных
                 string query = @"
                     UPDATE users
                     SET email = @p_email, username = @p_username, gender = @p_gender, birthday = @p_birthday, 
@@ -199,7 +199,7 @@ namespace WpfAppSql
             }
             else if (TableName == "albums")
             {
-                // Задание текста SQL-запроса для обновления данных в базе данных
+                // инициализация текста SQL-запроса для обновления данных в базе данных
                 string query = @"
                     UPDATE albums
                     SET title = @p_title, description = @p_description, user_id = @p_user_id, rate = @p_rate
@@ -241,7 +241,7 @@ namespace WpfAppSql
             }
             else if (TableName == "departments")
             {
-                // Задание текста SQL-запроса для обновления данных в базе данных
+                // инициализация текста SQL-запроса для обновления данных в базе данных
                 string query = @"
                     UPDATE departments
                     SET title = @p_title
@@ -266,7 +266,7 @@ namespace WpfAppSql
             }
             else if (TableName == "roles")
             {
-                // Задание текста SQL-запроса для обновления данных в базе данных
+                // инициализация текста SQL-запроса для обновления данных в базе данных
                 string query = @"
                     UPDATE roles
                     SET title = @p_title
@@ -297,7 +297,7 @@ namespace WpfAppSql
         {
             if (TableName == "users")
             {
-                // Задание текста SQL-запроса для удаления данных в базе данных
+                // инициализация текста SQL-запроса для обновления данных в базе данных
                 string query = @"UPDATE users SET deleted_at = GETDATE() WHERE id = @p_id;";
 
                 // Создание объекта SqlCommand с указанным текстом запроса и подключением к базе данных
