@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfAppSql", "WpfAppSql\WpfAppSql.csproj", "{2A9EC7F4-E51E-449A-A4BA-A38BC4F617FC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logbook-mystat_EF_Core", "Logbook-mystat_EF_Core\Logbook-mystat_EF_Core.csproj", "{5C3A90B1-7ECB-43AC-AF51-1C7A6BED00AE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2A9EC7F4-E51E-449A-A4BA-A38BC4F617FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2A9EC7F4-E51E-449A-A4BA-A38BC4F617FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2A9EC7F4-E51E-449A-A4BA-A38BC4F617FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2A9EC7F4-E51E-449A-A4BA-A38BC4F617FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C3A90B1-7ECB-43AC-AF51-1C7A6BED00AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C3A90B1-7ECB-43AC-AF51-1C7A6BED00AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C3A90B1-7ECB-43AC-AF51-1C7A6BED00AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C3A90B1-7ECB-43AC-AF51-1C7A6BED00AE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {1372EE68-C2D4-43EC-A024-FBC63A7FCCA2}
+		SolutionGuid = {32A710C6-E590-43A8-8064-13D0DF56244B}
 	EndGlobalSection
 EndGlobal
