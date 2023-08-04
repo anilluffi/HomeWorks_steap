@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 
 namespace Logbook_mystat_EF_Core
 {
-    internal class schedule_item
+
+    internal class Schedule_item
     {
         [Column("id")]
         public int Id { get; set; }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Logbook_mystat_EF_Core
 {
-    internal class pairs_students
+    internal class Pairs_Students
     {
         [Key]
         public int pair_id { get; set; }
@@ -26,8 +26,8 @@ namespace Logbook_mystat_EF_Core
         [MaxLength(1024)]
         public string? comment { get; set; }
 
-        public pairs pairs { get; set; }
-        public students students { get; set; }
+        public Pairs pairs { get; set; }
+        public Students students { get; set; }
 
 
     }

@@ -5,23 +5,31 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection.Emit;
+using System.Text.RegularExpressions;
 
 namespace Logbook_mystat_EF_Core
 {
-    internal class ClassroomsConfig : IEntityTypeConfiguration<classrooms>
+    internal class ClassroomsConfig : IEntityTypeConfiguration<Classrooms>
     {
-        public void Configure(EntityTypeBuilder<classrooms> builder)
+        public void Configure(EntityTypeBuilder<Classrooms> builder)
         {
             builder.Property(u => u.Id).HasColumnName("id");
             builder.Property(u => u.title).HasMaxLength(128);
 
+            builder.Property(u => u.ClassroomStatusId).HasColumnName("classroom_statuse_id");
+
+            builder.HasOne(c => c.ClassroomStatus)  
+               .WithMany()                    
+               .HasForeignKey(c => c.ClassroomStatusId)  
+               .OnDelete(DeleteBehavior.Restrict);
         }
 
     }
 
-    internal class Classrooms_statusesConfig : IEntityTypeConfiguration<classrooms_statuses>
+    internal class Classrooms_StatusesConfig : IEntityTypeConfiguration<Classrooms_Statuses>
     {
-        public void Configure(EntityTypeBuilder<classrooms_statuses> builder)
+        public void Configure(EntityTypeBuilder<Classrooms_Statuses> builder)
         {
             builder.Property(u => u.Id).HasColumnName("id");
 
@@ -29,9 +37,9 @@ namespace Logbook_mystat_EF_Core
 
     }
 
-    internal class GroupsConfig : IEntityTypeConfiguration<groups>
+    internal class GroupsConfig : IEntityTypeConfiguration<Groups>
     {
-        public void Configure(EntityTypeBuilder<groups> builder)
+        public void Configure(EntityTypeBuilder<Groups> builder)
         {
             builder.Property(u => u.Id).HasColumnName("id");
             builder.Property(u => u.title).HasMaxLength(256);
@@ -41,9 +49,9 @@ namespace Logbook_mystat_EF_Core
 
     }
 
-    internal class groups_start_finishConfig : IEntityTypeConfiguration<groups_start_finish>
+    internal class Groups_Start_FinishConfig : IEntityTypeConfiguration<Groups_Start_Finish>
     {
-        public void Configure(EntityTypeBuilder<groups_start_finish> builder)
+        public void Configure(EntityTypeBuilder<Groups_Start_Finish> builder)
         {
             builder.Property(u => u.Id).HasColumnName("id");
 
@@ -53,19 +61,19 @@ namespace Logbook_mystat_EF_Core
 
 
 
-    internal class Groups_studentsConfig : IEntityTypeConfiguration<groups_students>
+    internal class Groups_StudentsConfig : IEntityTypeConfiguration<Groups_Students>
     {
-        public void Configure(EntityTypeBuilder<groups_students> builder)
+        public void Configure(EntityTypeBuilder<Groups_Students> builder)
         {
-            builder.HasKey(u => new { u.group_id, u.student_id });
+            builder.HasKey(u => new { u.GroupId, u.StudentId });
 
         }
 
     }
 
-    internal class Home_WorksConfig : IEntityTypeConfiguration<home_works>
+    internal class Home_WorksConfig : IEntityTypeConfiguration<Home_Works>
     {
-        public void Configure(EntityTypeBuilder<home_works> builder)
+        public void Configure(EntityTypeBuilder<Home_Works> builder)
         {
             builder.Property(u => u.Id).HasColumnName("id");
             builder.Property(u => u.theme).HasMaxLength(128);
@@ -76,9 +84,9 @@ namespace Logbook_mystat_EF_Core
     }
 
 
-    internal class Pair_CrystalsConfig : IEntityTypeConfiguration<pair_crystals>
+    internal class Pair_CrystalsConfig : IEntityTypeConfiguration<Pair_Crystals>
     {
-        public void Configure(EntityTypeBuilder<pair_crystals> builder)
+        public void Configure(EntityTypeBuilder<Pair_Crystals> builder)
         {
             builder.HasKey(u => new { u.pair_id, u.student_id });
             builder.ToTable(t => t.HasCheckConstraint("quantity", "(quantity >= 1 AND quantity <= 3)"));
@@ -87,21 +95,66 @@ namespace Logbook_mystat_EF_Core
 
     }
 
-    internal class PairsConfig : IEntityTypeConfiguration<pairs>
+    internal class PairsConfig : IEntityTypeConfiguration<Pairs>
     {
-        public void Configure(EntityTypeBuilder<pairs> builder)
+        public void Configure(EntityTypeBuilder<Pairs> builder)
         {
             builder.Property(u => u.Id).HasColumnName("id");
             builder.Property(u => u.online_status).HasColumnName("online_status").HasDefaultValue(0);
             builder.Property(u => u.theme).HasMaxLength(128);
 
+
+            builder.HasOne(p => p.ScheduleItem)
+            .WithMany()
+            .HasForeignKey(p => p.ScheduleItemId)
+            .HasConstraintName("FK_rairs_schedule_item");
+
+            builder.Property(u => u.ScheduleItemId).HasColumnName("schedule_item_id");
+            builder.Property(u => u.ScheduleItem).HasColumnName("schedule_item");
+
+
+            builder.HasOne(p => p.Subject)
+                .WithMany()
+                .HasForeignKey(p => p.SubjectId)
+                .HasConstraintName("FK_rairs_subject");
+
+            builder.Property(u => u.SubjectId).HasColumnName("subject_id");
+            builder.Property(u => u.Subject).HasColumnName("subject");
+
+
+            builder.HasOne(p => p.Group)
+                .WithMany()
+                .HasForeignKey(p => p.GroupId)
+                .HasConstraintName("FK_rairs_group");
+
+            builder.Property(u => u.GroupId).HasColumnName("group_id");
+            builder.Property(u => u.Group).HasColumnName("group");
+
+
+            builder.HasOne(p => p.Classroom)
+                .WithMany()
+                .HasForeignKey(p => p.ClassroomId)
+                .HasConstraintName("FK_rairs_classroom");
+
+            builder.Property(u => u.ClassroomId).HasColumnName("classroom_id");
+            builder.Property(u => u.Classroom).HasColumnName("classroom");
+
+
+
+            builder.HasOne(p => p.Teacher)
+                .WithMany()
+                .HasForeignKey(p => p.TeacherId)
+                .HasConstraintName("FK_rairs_teacher");
+
+            builder.Property(u => u.TeacherId).HasColumnName("teacher_id");
+            builder.Property(u => u.Teacher).HasColumnName("teacher");
         }
 
     }
 
-    internal class Pairs_StudentsConfig : IEntityTypeConfiguration<pairs_students>
+    internal class Pairs_StudentsConfig : IEntityTypeConfiguration<Pairs_Students>
     {
-        public void Configure(EntityTypeBuilder<pairs_students> builder)
+        public void Configure(EntityTypeBuilder<Pairs_Students> builder)
         {
             builder.HasKey(u => new { u.pair_id, u.student_id });
             builder.Property(u => u.status).HasColumnName("status").HasDefaultValue(0);
@@ -117,9 +170,9 @@ namespace Logbook_mystat_EF_Core
     }
 
     
-    internal class Schedule_ItemConfig : IEntityTypeConfiguration<schedule_item>
+    internal class Schedule_ItemConfig : IEntityTypeConfiguration<Schedule_item>
     {
-        public void Configure(EntityTypeBuilder<schedule_item> builder)
+        public void Configure(EntityTypeBuilder<Schedule_item> builder)
         {
             builder.Property(u => u.Id).HasColumnName("id");
             builder.Property(u => u.status).HasColumnName("status").HasDefaultValue(1);
@@ -127,9 +180,9 @@ namespace Logbook_mystat_EF_Core
 
     }
 
-    internal class Student_Home_WorkConfig : IEntityTypeConfiguration<student_home_work>
+    internal class Student_Home_WorkConfig : IEntityTypeConfiguration<Student_Home_Work>
     {
-        public void Configure(EntityTypeBuilder<student_home_work> builder)
+        public void Configure(EntityTypeBuilder<Student_Home_Work> builder)
         {
             builder.HasKey(u => new { u.home_work_id, u.student_id });
             builder.Property(u => u.comment).HasMaxLength(1024);
@@ -140,9 +193,9 @@ namespace Logbook_mystat_EF_Core
     }
 
 
-    internal class studentsConfig : IEntityTypeConfiguration<students>
+    internal class StudentsConfig : IEntityTypeConfiguration<Students>
     {
-        public void Configure(EntityTypeBuilder<students> builder)
+        public void Configure(EntityTypeBuilder<Students> builder)
         {
             builder.Property(u => u.Id).HasColumnName("id");
             builder.Property(u => u.first_name).HasMaxLength(128);
@@ -153,9 +206,9 @@ namespace Logbook_mystat_EF_Core
 
     }
 
-    internal class subjectsConfig : IEntityTypeConfiguration<subjects>
+    internal class SubjectsConfig : IEntityTypeConfiguration<Subjects>
     {
-        public void Configure(EntityTypeBuilder<subjects> builder)
+        public void Configure(EntityTypeBuilder<Subjects> builder)
         {
             builder.Property(u => u.Id).HasColumnName("id");
             builder.Property(u => u.title).HasMaxLength(256);
@@ -165,19 +218,36 @@ namespace Logbook_mystat_EF_Core
     }
 
 
-    internal class subjects_teachersConfig : IEntityTypeConfiguration<subjects_teachers>
+    internal class Subjects_TeachersConfig : IEntityTypeConfiguration<Subjects_Teachers>
     {
-        public void Configure(EntityTypeBuilder<subjects_teachers> builder)
+        public void Configure(EntityTypeBuilder<Subjects_Teachers> builder)
         {
-            builder.HasKey(u => new { u.subject_id, u.teacher_id });
+            builder.HasKey(u => new { u.SubjectId, u.TeacherId });
+
+            builder.HasOne(st => st.Subject)
+            .WithMany()
+            .HasForeignKey(st => st.SubjectId)
+            .HasConstraintName("FK_subjects_teachers_subject");
+
+            builder.Property(u => u.SubjectId).HasColumnName("subject_id");
+            builder.Property(u => u.Subject).HasColumnName("subject");
+
+
+            builder.HasOne(st => st.Teacher)
+                .WithMany()
+                .HasForeignKey(st => st.TeacherId)
+                .HasConstraintName("FK_subjects_teachers_teacher");
+
+            builder.Property(u => u.TeacherId).HasColumnName("teacher_id");
+            builder.Property(u => u.Teacher).HasColumnName("teacher");
 
         }
 
     }
 
-    internal class teachersConfig : IEntityTypeConfiguration<teachers>
+    internal class TeachersConfig : IEntityTypeConfiguration<Teachers>
     {
-        public void Configure(EntityTypeBuilder<teachers> builder)
+        public void Configure(EntityTypeBuilder<Teachers> builder)
         {
             builder.Property(u => u.Id).HasColumnName("id");
             builder.Property(u => u.first_name).HasMaxLength(128);

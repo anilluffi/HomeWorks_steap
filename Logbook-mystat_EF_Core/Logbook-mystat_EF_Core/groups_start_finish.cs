@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Logbook_mystat_EF_Core
 {
-    internal class groups_start_finish
+    internal class Groups_Start_Finish
     {
         [Column("id")]
         public int Id { get; set; }
@@ -15,7 +15,7 @@ namespace Logbook_mystat_EF_Core
         public DateTime? finish { get; set; }
         public int group_id { get; set; }
 
-        public groups groups { get; set; }
+        public Groups groups { get; set; }
 
     }
 }

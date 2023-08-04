@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Logbook_mystat_EF_Core
 {
-    internal class classrooms
+    internal class Classrooms
     {
         [Column("id")]
         public int Id { get; set; }
@@ -16,9 +16,10 @@ namespace Logbook_mystat_EF_Core
 
         [MaxLength(128)]
         public string title { get; set; }
-        public int classroom_statuse_id { get; set; }
+        [Column("classroom_statuse_id")]
+        public int  ClassroomStatusId { get; set; }
 
-        public classrooms_statuses ClassroomStatus { get; set; }
+        public Classrooms_Statuses ClassroomStatus { get; set; }
 
     }
 }

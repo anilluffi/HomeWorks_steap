@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Logbook_mystat_EF_Core
 {
-    internal class groups
+    internal class Groups
     {
         [Column("id")]
         public int Id { get; set; }
@@ -21,6 +21,6 @@ namespace Logbook_mystat_EF_Core
         public byte status { get; set; }
 
         public int groups_start_finish_id { get; set; }
-        public groups_start_finish groups_start_finish { get; set; }
+        public Groups_Start_Finish groups_start_finish { get; set; }
     }
 }

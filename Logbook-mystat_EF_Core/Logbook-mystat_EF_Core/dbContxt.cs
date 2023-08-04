@@ -9,19 +9,19 @@ namespace Logbook_mystat_EF_Core
 {
     internal class dbContxt : DbContext
     {
-        public DbSet<schedule_item> schedule_item { get; set; }
-        public DbSet<subjects> subjects { get; set; }
-        public DbSet<groups> groups { get; set; }
-        public DbSet<classrooms_statuses> classrooms_statuses { get; set; }
+        public DbSet<Schedule_item> schedule_item { get; set; }
+        public DbSet<Subjects> subjects { get; set; }
+        public DbSet<Groups> groups { get; set; }
+        public DbSet<Classrooms_Statuses> classrooms_statuses { get; set; }
 
-        public DbSet<classrooms> classrooms { get; set; }
+        public DbSet<Classrooms> classrooms { get; set; }
 
-        public DbSet<teachers> teachers { get; set; }
-        public DbSet<pairs> pairs { get; set; }
-        public DbSet<subjects_teachers> subjects_teachers { get; set; }
-        public DbSet<students> students { get; set; }
-        public DbSet<groups_students> groups_students { get; set; }
-        public DbSet<pairs_students> pairs_students { get; set; }
+        public DbSet<Teachers> teachers { get; set; }
+        public DbSet<Pairs> pairs { get; set; }
+        public DbSet<Subjects_Teachers> subjects_teachers { get; set; }
+        public DbSet<Students> students { get; set; }
+        public DbSet<Groups_Students> groups_students { get; set; }
+        public DbSet<Pairs_Students> pairs_students { get; set; }
 
 
 
@@ -40,47 +40,21 @@ namespace Logbook_mystat_EF_Core
 
         protected override void OnModelCreating(ModelBuilder mb)
         {
-            //  mb.Entity<Role>();
-
-            //  mb.Ignore(typeof(Role));
-            //  mb.Ignore<Role>();
-
-            //  mb.Entity<User>().Ignore(u => u.Token);
-
-            //  mb.Entity<User>().ToTable("clients");
-
-            //  mb.Entity<User>().Property(u => u.Id).HasColumnName("id");
-
-            // mb.Entity<User>().Property(u => u.Id).HasField("id");
-            // mb.Entity<User>().Property(u => u.Email).HasField("email");
-            // mb.Entity<User>().Property(u => u.Age).HasField("age");
-            // mb.Entity<User>().Property("hash");
-
-            // mb.Entity<User>().Property(u => u.Age).IsRequired();
-
-            // mb.Entity<User>().HasKey(u => u.Ident).HasName("PK_users_777");
-
-            // mb.Entity<User>().HasKey(u => new { u.Email, u.Nickname});
-
-            // mb.Entity<User>().HasAlternateKey(u => u.Email);
-
-            // mb.Entity<User>().HasAlternateKey(u => new { u.Email, u.Age});
-
-            // mb.Entity<User>().HasIndex(u => u.Email).IsUnique().HasName("IX_users_email_unique");
-
-            // mb.Entity<User>().Property(u => u.Id).ValueGeneratedNever();
-
-            // mb.Entity<User>().Property(u => u.Age).HasDefaultValue(18);
-
-            // mb.Entity<User>().Property(u => u.CreatedAt).HasDefaultValueSql("GETDATE()");
-
-            // mb.Entity<User>().Property(u => u.CreatedAt).HasComputedColumnSql("FirstName + ' ' + LastName");
-
-            // mb.Entity<User>().ToTable(t => t.HasCheckConstraint("Password", "LEN(Password) > 8"));
-
-            // mb.Entity<User>().Property(u => u.Password).HasMaxLength(20);
-
-            //mb.ApplyConfiguration(new UserConfig());
+            mb.ApplyConfiguration(new ClassroomsConfig());
+            mb.ApplyConfiguration(new Classrooms_StatusesConfig());
+            mb.ApplyConfiguration(new GroupsConfig());
+            mb.ApplyConfiguration(new Groups_Start_FinishConfig());
+            mb.ApplyConfiguration(new Groups_StudentsConfig());
+            mb.ApplyConfiguration(new Home_WorksConfig());
+            mb.ApplyConfiguration(new Pair_CrystalsConfig());
+            mb.ApplyConfiguration(new PairsConfig());
+            mb.ApplyConfiguration(new Pairs_StudentsConfig());
+            mb.ApplyConfiguration(new Schedule_ItemConfig());
+            mb.ApplyConfiguration(new Student_Home_WorkConfig());
+            mb.ApplyConfiguration(new StudentsConfig());
+            mb.ApplyConfiguration(new SubjectsConfig());
+            mb.ApplyConfiguration(new Subjects_TeachersConfig());
+            mb.ApplyConfiguration(new TeachersConfig());
 
         }
 

@@ -1,23 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Logbook_mystat_EF_Core
 {
-    internal class groups_students
+    internal class Groups_Students
     {
         [Key]
-        public int group_id { get; set; }
+
+        [Column("group_id")]
+        public int GroupId { get; set; }
 
         [Key]
-        public int student_id { get; set;}
+        [Column("student_id")]
+        public int StudentId { get; set;}
+        
         public byte status { get; set; }
 
-        public groups groups { get; set; }
+        [Column("groups")]
+        public Groups Groups { get; set; }
 
-        public students students { get; set; }
+        [Column("students")]
+        public Students Students { get; set; }
     }
 }

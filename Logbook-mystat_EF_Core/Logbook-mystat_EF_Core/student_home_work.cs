@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Logbook_mystat_EF_Core
 {
-    internal class student_home_work
+    internal class Student_Home_Work
     {
         [Key]
         public int home_work_id { get; set; }
@@ -22,7 +22,7 @@ namespace Logbook_mystat_EF_Core
         public string comment { get; set; }
 
 
-        public home_works home_works { get; set; }
-        public students students { get; set; }
+        public Home_Works home_works { get; set; }
+        public Students students { get; set; }
     }
 }

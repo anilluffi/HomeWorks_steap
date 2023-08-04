@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Logbook_mystat_EF_Core
 {
-    internal class teachers
+    internal class Teachers
     {
         [Column("id")]
         public int Id { get; set; }

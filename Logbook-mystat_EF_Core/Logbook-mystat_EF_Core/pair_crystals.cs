@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Logbook_mystat_EF_Core
 {
-    internal class pair_crystals
+    internal class Pair_Crystals
     {
         [Key]
         [Column(Order = 1)]
@@ -18,8 +18,8 @@ namespace Logbook_mystat_EF_Core
         public int student_id { get; set;}
         public byte quantity { get; set; }
 
-        public pairs pairs { get; set; }
-        public students students { get; set; }
+        public Pairs pairs { get; set; }
+        public Students students { get; set; }
 
     }
 }

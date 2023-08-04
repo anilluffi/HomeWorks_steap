@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Logbook_mystat_EF_Core
 {
-    internal class home_works
+    internal class Home_Works
     {
         [Column("id")]
         public int Id { get; set; }
@@ -25,9 +25,9 @@ namespace Logbook_mystat_EF_Core
         [DefaultValue((byte)0)]
         public byte status { get; set; }
 
-        public pairs pairs { get; set; }
-        public teachers teachers { get; set; }
-        public groups groups { get; set; }
+        public Pairs pairs { get; set; }
+        public Teachers teachers { get; set; }
+        public Groups groups { get; set; }
 
 
     }
