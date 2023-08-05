@@ -11,15 +11,15 @@ namespace Logbook_mystat_EF_Core
     internal class Pair_Crystals
     {
         [Key]
-        [Column(Order = 1)]
-        public int pair_id { get; set; }
+        [Column("pair_id")]
+        public int PairId { get; set; }
         [Key]
-        [Column(Order = 2)]
-        public int student_id { get; set;}
+        [Column("student_id")]
+        public int StudentId { get; set;}
         public byte quantity { get; set; }
 
-        public Pairs pairs { get; set; }
-        public Students students { get; set; }
+        public Pairs Pair { get; set; }
+        public Students Student { get; set; }
 
     }
 }

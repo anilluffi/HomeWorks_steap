@@ -8,7 +8,7 @@
     "**/platforms"
   ],
   "ConnectionStrings": {
-    "Express": "Server=.\\SQLEXPRESS;Database=p01_migrations;Trusted_Connection=True;Encrypt=False;"
+    "Express": "Server=.\\SQLEXPRESS;Database=p01_codefirs;Trusted_Connection=True;Encrypt=False;"
   }
 
 }

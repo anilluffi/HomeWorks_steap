@@ -13,9 +13,11 @@ namespace Logbook_mystat_EF_Core
         public int Id { get; set; }
         public DateTime start { get; set; }
         public DateTime? finish { get; set; }
-        public int group_id { get; set; }
 
-        public Groups groups { get; set; }
+        [Column("group_id")]
+        public int GroupId { get; set; }
+
+        public Groups Group { get; set; }
 
     }
 }

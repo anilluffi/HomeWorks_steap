@@ -34,7 +34,7 @@ namespace Logbook_mystat_EF_Core
 
         protected override void OnConfiguring(DbContextOptionsBuilder builder)
         {
-            builder.UseSqlServer(@"Server=.\SQLEXPRESS;Database=p01_fluent_api_attr;Trusted_Connection=True;Encrypt=False;");
+            builder.UseSqlServer(@"Server=.\SQLEXPRESS;Database=p01_codefirs;Trusted_Connection=True;Encrypt=False;");
         }
 
 

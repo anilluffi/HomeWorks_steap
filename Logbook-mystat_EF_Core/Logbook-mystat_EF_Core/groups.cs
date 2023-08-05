@@ -21,6 +21,12 @@ namespace Logbook_mystat_EF_Core
         public byte status { get; set; }
 
         public int groups_start_finish_id { get; set; }
-        public Groups_Start_Finish groups_start_finish { get; set; }
+
+
+
+        [Column("groups_start_finish")]
+        public Groups_Start_Finish GroupsStartFinish  { get; set; }
+        public ICollection<Groups_Students> Students_Groups { get; set; }
+
     }
 }

@@ -20,7 +20,7 @@ namespace Logbook_mystat_EF_Core
         [MaxLength(128)]
         public string theme { get; set; }
 
-        [Column("schedule_item_id")]
+        //[Column("schedule_item_id")]
         public int ScheduleItemId  { get; set; }
 
         [Column("subject_id")]
@@ -35,7 +35,7 @@ namespace Logbook_mystat_EF_Core
         [Column("teacher_id")]
         public int TeacherId { get; set; }
 
-        [Column("schedule_item")]
+        //[Column("schedule_item")]
         public Schedule_item ScheduleItem  { get; set; }
 
         [Column("subject")]
@@ -49,6 +49,8 @@ namespace Logbook_mystat_EF_Core
 
         [Column("teacher")]
         public Teachers Teacher { get; set; }
+        public ICollection<Pairs_Students> Pairs_Students { get; set; }
+
 
     }
 

@@ -21,10 +21,8 @@ namespace Logbook_mystat_EF_Core
         
         public byte status { get; set; }
 
-        [Column("groups")]
-        public Groups Groups { get; set; }
-
-        [Column("students")]
-        public Students Students { get; set; }
+        
+        public Groups Group { get; set; }
+        public Students Student { get; set; }
     }
 }

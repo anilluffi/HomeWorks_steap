@@ -22,6 +22,9 @@ namespace Logbook_mystat_EF_Core
         [MaxLength(64)]
         public string email { get; set; }
 
+        public ICollection<Groups_Students> Students_Groups { get; set; }
+        public ICollection<Pairs_Students> Pairs_Students { get; set; }
+
 
     }
 }
