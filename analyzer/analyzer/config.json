@@ -1,0 +1,16 @@
+{
+  "exclude": [
+    "/bin",
+    "/bower_components",
+    "/jspm_packages",
+    "/node_modules",
+    "/obj",
+    "/platforms"
+  ],
+
+  "ConnectionStrings": {
+    "SqlSrever": "Server=.\\SQLEXPRESS;Trusted_Connection=True;Encrypt=False;",
+    "MySqlSrever": "server=localhost;port=3306;user=root;"
+  }
+
+}
