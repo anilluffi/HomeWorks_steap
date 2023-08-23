@@ -33,7 +33,7 @@
         <Label Content="DB for saving analysis" Margin="163,10,4,54"  Grid.Column="1" />
         <ComboBox Name="CBSaveAnalysis" Grid.Column="1" HorizontalAlignment="Left" Margin="167,34,0,0" VerticalAlignment="Top" Width="120" Height="22" SelectionChanged="ComboBox_SelectionChanged_2"/>
 
-        <Button Content="Let's"  Margin="260,66,260,5" Grid.ColumnSpan="2"/>
+        <Button Content="Let's"  Margin="260,66,260,5" Grid.ColumnSpan="2" Click="Button_Click"/>
 
 
     </Grid>

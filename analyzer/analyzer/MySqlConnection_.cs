@@ -34,31 +34,100 @@ namespace analyzer
             connectionString = config.GetConnectionString(ServerName);
         }
 
-        public void OpenConnectionAsync(ComboBox comboBox)
-        {
 
-            using (MySql.Data.MySqlClient.MySqlConnection connection = new MySql.Data.MySqlClient.MySqlConnection(connectionString))
+
+        public async Task<MySqlConnection> MySqlOpenConnectionAsync(MySqlConnection connection)
+        {
+            connection = new MySqlConnection(connectionString);
+            try
             {
-                try
+                await connection.OpenAsync();
+                //MessageBox.Show($"sql Connection {connection.State}");
+                return connection;
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error opening connection: " + ex.Message);
+                return null;
+            }
+
+
+        }
+
+        public void ComboBoxFiller(ComboBox comboBox, MySqlConnection connection)
+        {
+            try
+            {
+                //перед заполнением очистка
+                comboBox.Items.Clear();
+
+                MySqlCommand command = new MySqlCommand("SHOW DATABASES", connection);
+                using (MySqlDataReader reader = command.ExecuteReader())
                 {
-                    connection.Open();
-                    MySqlCommand command = new MySqlCommand("SHOW DATABASES", connection);
-                    using (MySqlDataReader reader = command.ExecuteReader())
+                    while (reader.Read())
                     {
-                        while (reader.Read())
-                        {
-                            string dbName = reader.GetString(0);
-                            comboBox.Items.Add(dbName); // Добавляем имя базы данных в ComboBox
-                        }
+                        string dbName = reader.GetString(0);
+                        comboBox.Items.Add(dbName); // Добавляем имя базы данных в ComboBox
                     }
-                    MessageBox.Show("mysql Connection open");
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error opening connection: " + ex.Message);
                 }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
         }
+        public async Task<MySqlConnection> DbConnectionAsync(ComboBox comboBox, MySqlConnection connection)
+        {
+            string databaseName = comboBox.SelectedItem.ToString();
+            string useDatabaseQuery = $"USE {databaseName}";
+            try
+            {
+                using (MySqlCommand command = new MySqlCommand(useDatabaseQuery, connection))
+                {
+                    await command.ExecuteNonQueryAsync();
+                }
+
+                return connection;
+            }
+            catch
+            {
+                return null;
+            }
+
+
+
+        }
+
+
+        //        public async 
+        //        Task
+        //OpenConnectionAsync(ComboBox comboBox)
+        //        {
+
+        //            using (MySql.Data.MySqlClient.MySqlConnection connection = new MySql.Data.MySqlClient.MySqlConnection(connectionString))
+        //            {
+        //                try
+        //                {
+        //                    await connection.OpenAsync();
+        //                    MySqlCommand command = new MySqlCommand("SHOW DATABASES", connection);
+        //                    using (MySqlDataReader reader = command.ExecuteReader())
+        //                    {
+        //                        while (reader.Read())
+        //                        {
+        //                            string dbName = reader.GetString(0);
+        //                            comboBox.Items.Add(dbName); // Добавляем имя базы данных в ComboBox
+        //                        }
+        //                    }
+        //                    MessageBox.Show("mysql Connection open");
+        //                }
+        //                catch (Exception ex)
+        //                {
+        //                    MessageBox.Show("Error opening connection: " + ex.Message);
+        //                }
+        //            }
+        //        }
 
         async public void GetDbNamesAsync()
         {

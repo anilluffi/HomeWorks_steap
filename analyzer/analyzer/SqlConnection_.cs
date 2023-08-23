@@ -33,47 +33,48 @@ namespace analyzer
             connectionString = config.GetConnectionString(ServerName);
         }
 
-        
-
-        async public Task OpenConnectionAsync(ComboBox comboBox)
+        public async Task<SqlConnection> OpenConnectionAsync(SqlConnection connection)
         {
-
-            using (connection = new SqlConnection(connectionString))
-            {
-                try
-                {
-                    await connection.OpenAsync();
-
-                    MessageBox.Show("sql Connection open ");
-
-                    SqlCommand command = new SqlCommand("SELECT name FROM sys.databases", connection);
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            string dbName = reader.GetString(0);
-                            comboBox.Items.Add(dbName); // Добавляем имя базы данных в ComboBox
-                        }
-                    }
-
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error opening connection: " + ex.Message);
-                }
-            }
-        }
-
-        public void dbComboBoxFiller(ComboBox comboBox)
-        {
+            connection = new SqlConnection(connectionString);
             try
             {
-                
+                await connection.OpenAsync();
+
+                //MessageBox.Show($"sql Connection {connection.State}");
+                return connection;
+
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Error opening connection: " + ex.Message);
+                return null;
             }
+
+
+        }
+
+        public void ComboBoxFiller(ComboBox comboBox, SqlConnection connection)
+        {
+            try
+            {
+                //перед заполнением очистка
+                comboBox.Items.Clear();
+
+                SqlCommand command = new SqlCommand("SELECT name FROM sys.databases", connection);
+                using (SqlDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        string dbName = reader.GetString(0);
+                        comboBox.Items.Add(dbName); // Добавляем имя базы данных в ComboBox
+                    }
+                }
+            }
+            catch (Exception ex) 
+            { 
+                MessageBox.Show(ex.Message);
+            }
+            
         }
 
         async public void GetDbNamesAsync()
@@ -95,8 +96,6 @@ namespace analyzer
                         names.Add(databaseName);
                     }
 
-
-                    
                 }
                 catch (Exception ex)
                 {
@@ -104,6 +103,71 @@ namespace analyzer
                 }
             }
         }
+
+        public async Task<SqlConnection> DbConnectionAsync(ComboBox comboBox, SqlConnection connection)
+        {
+            string databaseName = comboBox.SelectedItem.ToString();
+            string useDatabaseQuery = $"USE {databaseName}";
+            try
+            {
+                using (SqlCommand command = new SqlCommand(useDatabaseQuery, connection))
+                {
+                    await command.ExecuteNonQueryAsync();
+                }
+
+                return connection;
+            }
+            catch 
+            { 
+                return null;
+            }
+        
+
+        
+        }
+
+        //public async  Task OpenConnectionAsync(ComboBox comboBox)
+        //{
+
+        //    using (connection = new SqlConnection(connectionString))
+        //    {
+        //        try
+        //        {
+        //            await connection.OpenAsync();
+
+        //            MessageBox.Show("sql Connection open ");
+
+        //            SqlCommand command = new SqlCommand("SELECT name FROM sys.databases", connection);
+        //            using (SqlDataReader reader = command.ExecuteReader())
+        //            {
+        //                while (reader.Read())
+        //                {
+        //                    string dbName = reader.GetString(0);
+        //                    comboBox.Items.Add(dbName); // Добавляем имя базы данных в ComboBox
+        //                }
+        //            }
+
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            MessageBox.Show("Error opening connection: " + ex.Message);
+        //        }
+        //    }
+        //}
+
+        //public void dbComboBoxFiller(ComboBox comboBox)
+        //{
+        //    try
+        //    {
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show("Error opening connection: " + ex.Message);
+        //    }
+        //}
+
+
 
         public void dbSqllistinComboBox()
         {

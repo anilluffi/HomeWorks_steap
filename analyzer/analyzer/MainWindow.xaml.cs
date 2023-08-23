@@ -23,9 +23,11 @@ namespace analyzer
 
         SqlConnection_ SqlConn = new SqlConnection_();
         MySqlConnection_ MySqlConn= new MySqlConnection_();
+        SqlConnection connSql = new SqlConnection();
+        MySqlConnection MySqlConnection = new MySqlConnection();
+        string serverOutput = "";
+        string serverInput = "";
 
-        SqlConnection connection = new SqlConnection();
-        // conn.OpenConnectionAsync();
         public MainWindow()
         {
             InitializeComponent();
@@ -42,42 +44,102 @@ namespace analyzer
             ServerSave.ItemsSource = items;
         }
 
-        public async void con(ComboBox comboBox)
+        public async Task<string> con(ComboBox comboBox, string server)
         {
-            if (comboBox.SelectedItem.ToString() == "Sql Srever")
+            server = comboBox.SelectedItem.ToString();
+            if (server == "Sql Srever")
             {
+                
                 SqlConn = new SqlConnection_("SqlSrever");
-                await SqlConn.OpenConnectionAsync(dbForAnalysis);
 
-                //SqlConn.dbComboBoxFiller(dbForAnalysis);
+                if(comboBox == FromServer)
+                {
+                    connSql = await SqlConn.OpenConnectionAsync(connSql);
+                    SqlConn.ComboBoxFiller(dbForAnalysis, connSql);
+                }
+                else if (comboBox == ServerSave)
+                {
+                    connSql = await SqlConn.OpenConnectionAsync(connSql);
+                    SqlConn.ComboBoxFiller(CBSaveAnalysis, connSql);
+                }
+                return server;
 
             }
-            else if (comboBox.SelectedItem.ToString() == "My Sql Srever")
+            else if (server == "My Sql Srever")
             {
-                MySqlConn = new MySqlConnection_("MySqlSrever");
-                MySqlConn.OpenConnectionAsync(CBSaveAnalysis);
+                MySqlConn = new MySqlConnection_("MySqlSrever"); 
+                if (comboBox == FromServer)
+                {//
+                    MySqlConnection = await MySqlConn.MySqlOpenConnectionAsync(MySqlConnection);
+                    MySqlConn.ComboBoxFiller(dbForAnalysis, MySqlConnection);
+                }
+                else if (comboBox == ServerSave)
+                {
+                    MySqlConnection = await MySqlConn.MySqlOpenConnectionAsync(MySqlConnection);
+                    MySqlConn.ComboBoxFiller(CBSaveAnalysis, MySqlConnection);
+                }
+
+                return server;
             }
-        }
 
-        public void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+            return server;
+        }
+        public async void f(ComboBox comboBox, string server)
         {
-            con(FromServer);
+            if (server == "Sql Srever")
+            {
+                connSql = await SqlConn.DbConnectionAsync(comboBox, connSql);
+            }
+            else if (server == "My Sql Srever")
+            {
+                MySqlConnection = await MySqlConn.DbConnectionAsync(comboBox, MySqlConnection);
+                
+            }
+
+
+            //using (SqlCommand command = new SqlCommand("SELECT DB_NAME() AS CurrentDatabase", connSql))
+            //{
+            //    string currentDatabase = (string)command.ExecuteScalar();
+            //    MessageBox.Show($"Connected to database: {currentDatabase}");
+            //}
+        }
+        
+        public async void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is ComboBox comboBox)
+            {
+                serverOutput = await con(comboBox,  serverOutput);
+            }
 
         }
 
+        private async void ServerSave_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is ComboBox comboBox)
+            { serverInput = await con(comboBox,  serverInput); }
+        }
         private void ComboBox_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
         {
-            SqlConn.dbComboBoxFiller(dbForAnalysis);
+            if (sender is ComboBox comboBox)
+            {
+                f(comboBox, serverOutput);
+            }
         }
 
         private void ComboBox_SelectionChanged_2(object sender, SelectionChangedEventArgs e)
         {
-            
+            if (sender is ComboBox comboBox)
+            {
+                f(comboBox, serverInput);
+               
+                
+            }
+
         }
 
-        private void ServerSave_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void Button_Click(object sender, RoutedEventArgs e)
         {
-            con(ServerSave);
+
         }
     }
 }
