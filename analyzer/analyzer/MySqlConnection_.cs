@@ -9,6 +9,8 @@ using System.Windows;
 
 using MySql.Data.MySqlClient;
 using System.Data;
+using Microsoft.Data.SqlClient;
+using System.Windows.Controls;
 
 namespace analyzer
 {
@@ -32,15 +34,23 @@ namespace analyzer
             connectionString = config.GetConnectionString(ServerName);
         }
 
-        async public void OpenConnectionAsync()
+        public void OpenConnectionAsync(ComboBox comboBox)
         {
 
             using (MySql.Data.MySqlClient.MySqlConnection connection = new MySql.Data.MySqlClient.MySqlConnection(connectionString))
             {
                 try
                 {
-                    await connection.OpenAsync();
-
+                    connection.Open();
+                    MySqlCommand command = new MySqlCommand("SHOW DATABASES", connection);
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string dbName = reader.GetString(0);
+                            comboBox.Items.Add(dbName); // Добавляем имя базы данных в ComboBox
+                        }
+                    }
                     MessageBox.Show("mysql Connection open");
                 }
                 catch (Exception ex)

@@ -6,6 +6,7 @@ using System.IO;
 using System.Data;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 
 namespace analyzer
 {
@@ -16,9 +17,8 @@ namespace analyzer
     {
 
         ConfigurationBuilder cBuilder = new ConfigurationBuilder();
-        
+        SqlConnection connection = new SqlConnection();
         public string? connectionString;
-
         public SqlConnection_()
         {
 
@@ -35,16 +35,26 @@ namespace analyzer
 
         
 
-        async public void OpenConnectionAsync()
+        async public Task OpenConnectionAsync(ComboBox comboBox)
         {
 
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            using (connection = new SqlConnection(connectionString))
             {
                 try
                 {
                     await connection.OpenAsync();
 
                     MessageBox.Show("sql Connection open ");
+
+                    SqlCommand command = new SqlCommand("SELECT name FROM sys.databases", connection);
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string dbName = reader.GetString(0);
+                            comboBox.Items.Add(dbName); // Добавляем имя базы данных в ComboBox
+                        }
+                    }
 
                 }
                 catch (Exception ex)
@@ -54,9 +64,21 @@ namespace analyzer
             }
         }
 
+        public void dbComboBoxFiller(ComboBox comboBox)
+        {
+            try
+            {
+                
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error opening connection: " + ex.Message);
+            }
+        }
+
         async public void GetDbNamesAsync()
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            using (connection = new SqlConnection(connectionString))
             {
                 try
                 {
@@ -72,6 +94,9 @@ namespace analyzer
                         string databaseName = database["database_name"].ToString();
                         names.Add(databaseName);
                     }
+
+
+                    
                 }
                 catch (Exception ex)
                 {
@@ -79,6 +104,13 @@ namespace analyzer
                 }
             }
         }
+
+        public void dbSqllistinComboBox()
+        {
+            
+        }
+
+
 
         //public void CloseConnection()
         //{

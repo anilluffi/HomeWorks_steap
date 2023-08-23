@@ -23,6 +23,8 @@ namespace analyzer
 
         SqlConnection_ SqlConn = new SqlConnection_();
         MySqlConnection_ MySqlConn= new MySqlConnection_();
+
+        SqlConnection connection = new SqlConnection();
         // conn.OpenConnectionAsync();
         public MainWindow()
         {
@@ -37,27 +39,45 @@ namespace analyzer
             };
 
             FromServer.ItemsSource = items;
+            ServerSave.ItemsSource = items;
         }
 
-        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        public async void con(ComboBox comboBox)
         {
-            if(FromServer.SelectedItem.ToString() == "Sql Srever")
+            if (comboBox.SelectedItem.ToString() == "Sql Srever")
             {
                 SqlConn = new SqlConnection_("SqlSrever");
-                SqlConn.OpenConnectionAsync();
+                await SqlConn.OpenConnectionAsync(dbForAnalysis);
+
+                //SqlConn.dbComboBoxFiller(dbForAnalysis);
+
             }
-            else if (FromServer.SelectedItem.ToString() == "My Sql Srever")
+            else if (comboBox.SelectedItem.ToString() == "My Sql Srever")
             {
                 MySqlConn = new MySqlConnection_("MySqlSrever");
-                MySqlConn.OpenConnectionAsync();
+                MySqlConn.OpenConnectionAsync(CBSaveAnalysis);
             }
+        }
 
-            
+        public void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            con(FromServer);
+
         }
 
         private void ComboBox_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
         {
+            SqlConn.dbComboBoxFiller(dbForAnalysis);
+        }
 
+        private void ComboBox_SelectionChanged_2(object sender, SelectionChangedEventArgs e)
+        {
+            
+        }
+
+        private void ServerSave_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            con(ServerSave);
         }
     }
 }
