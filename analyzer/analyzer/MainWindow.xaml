@@ -18,22 +18,23 @@
             <RowDefinition Height="80*"></RowDefinition>
         </Grid.RowDefinitions>
 
-        <DataGrid Grid.ColumnSpan="2" Grid.Row="1"  d:ItemsSource="{d:SampleData ItemCount=5}" Margin="5,5,5,5"/>
+        <DataGrid x:Name="dataGrid" Grid.ColumnSpan="2" Grid.Row="1"  d:ItemsSource="{d:SampleData ItemCount=5}" Margin="5,5,5,5"/>
 
 
-        <Label Content="from server" Margin="8,9,172,52" />
-        <ComboBox Name="FromServer" HorizontalAlignment="Left" Margin="10,34,0,0" VerticalAlignment="Top" Width="120" Height="22" SelectionChanged="ComboBox_SelectionChanged"/>
+        <Label Content="from server" Margin="8,0,172,61" />
+        <ComboBox Name="FromServer" HorizontalAlignment="Left" Margin="10,25,0,0" VerticalAlignment="Top" Width="120" Height="22" SelectionChanged="ComboBox_SelectionChanged"/>
 
-        <Label Content="db being analyzed" Margin="146,9,34,52"/>
-        <ComboBox Name="dbForAnalysis" HorizontalAlignment="Left" Margin="150,34,0,0" VerticalAlignment="Top" Width="120" Height="22" SelectionChanged="ComboBox_SelectionChanged_1"/>
+        <Label Content="db being analyzed" Margin="150,0,30,61"/>
+        <ComboBox Name="dbForAnalysis" HorizontalAlignment="Left" Margin="156,25,0,0" VerticalAlignment="Top" Width="120" Height="22" SelectionChanged="ComboBox_SelectionChanged_1"/>
 
-        <Label Content="server in which we save"  Margin="5,10,162,54" Grid.Column="1" />
-        <ComboBox Name="ServerSave" Grid.Column="1" HorizontalAlignment="Left" Margin="10,34,0,0" VerticalAlignment="Top" Width="120" Height="22" SelectionChanged="ServerSave_SelectionChanged"/>
+        <Label Content="server in which we save"  Margin="5,1,162,63" Grid.Column="1" />
+        <ComboBox Name="ServerSave" Grid.Column="1" HorizontalAlignment="Left" Margin="10,25,0,0" VerticalAlignment="Top" Width="120" Height="22" SelectionChanged="ServerSave_SelectionChanged"/>
 
-        <Label Content="DB for saving analysis" Margin="163,10,4,54"  Grid.Column="1" />
-        <ComboBox Name="CBSaveAnalysis" Grid.Column="1" HorizontalAlignment="Left" Margin="167,34,0,0" VerticalAlignment="Top" Width="120" Height="22" SelectionChanged="ComboBox_SelectionChanged_2"/>
+        <Label Content="DB for saving analysis" Margin="163,1,4,63"  Grid.Column="1" />
+        <ComboBox Name="CBSaveAnalysis" Grid.Column="1" HorizontalAlignment="Left" Margin="167,25,0,0" VerticalAlignment="Top" Width="120" Height="22" SelectionChanged="ComboBox_SelectionChanged_2"/>
 
-        <Button Content="Let's"  Margin="260,66,260,5" Grid.ColumnSpan="2" Click="Button_Click"/>
+        <Button Content="Analyz" Grid.Row="0" Grid.Column="0"  Margin="112,61,134,10"  Click="Analyz_Click"/>
+        <Button Content="Save" Grid.Row="0" Grid.Column="1"  Margin="123,61,123,10"  Click="Save_Click"/>
 
 
     </Grid>
