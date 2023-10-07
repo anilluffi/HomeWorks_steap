@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel.Design;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -19,6 +20,7 @@ using System.Windows.Shapes;
 using Microsoft.Data.SqlClient;
 using MySql.Data.MySqlClient;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using static Google.Protobuf.WellKnownTypes.Field.Types;
 
 namespace analyzer
 {
@@ -31,7 +33,9 @@ namespace analyzer
         MySqlConnection MySqlConnection = new MySqlConnection();
         string serverOutput = "";
         string serverInput = "";
-
+        string TableCountString = "";
+        string DbSizeString = "";
+        string AnalysisDateString = "";
         public MainWindow()
         {
             InitializeComponent();
@@ -152,19 +156,7 @@ namespace analyzer
 
         private void Analyz_Click(object sender, RoutedEventArgs e)
         {
-            // Общее количество таблиц в базе данных
-            // Total number of tables in the db
-            //
-            // Оценка размера базы данных на диске (в МБ):
-            // size of db on disk (in MB)
-            //
-            // дата анализа
-            // date of analysis
-
-            //string TableCountString = "1";
-            //string DbSizeString = "2";
-            //string AnalysisDateString = "3";
-            //IF NOT EXISTS
+            
             string ComText = @"
             IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[AnalyzeDatabase]') AND type in (N'P', N'PC'))
             BEGIN
@@ -204,22 +196,22 @@ namespace analyzer
            command1.ExecuteNonQuery();
 
 
-            // Создайте объект SqlCommand для вызова процедуры AnalyzeDatabase
+            // для вызова процедуры AnalyzeDatabase
             SqlCommand command2 = new SqlCommand("AnalyzeDatabase", connSql);
             command2.CommandType = CommandType.StoredProcedure;
 
-            // Добавьте параметры OUTPUT для получения результатов
+            //параметры OUTPUT для получения результатов
             command2.Parameters.Add(new SqlParameter("@TableCountString", SqlDbType.VarChar, -1) { Direction = ParameterDirection.Output });
             command2.Parameters.Add(new SqlParameter("@DbSizeString", SqlDbType.VarChar, -1) { Direction = ParameterDirection.Output });
             command2.Parameters.Add(new SqlParameter("@AnalysisDateString", SqlDbType.VarChar, -1) { Direction = ParameterDirection.Output });
 
 
-            // Выполните процедуру
+            // Выполнение процедуры
             command2.ExecuteNonQuery();
 
-            string TableCountString = command2.Parameters["@TableCountString"].Value.ToString();
-            string DbSizeString = command2.Parameters["@DbSizeString"].Value.ToString();
-            string AnalysisDateString = command2.Parameters["@AnalysisDateString"].Value.ToString();
+            TableCountString = command2.Parameters["@TableCountString"].Value.ToString();
+            DbSizeString = command2.Parameters["@DbSizeString"].Value.ToString();
+            AnalysisDateString = command2.Parameters["@AnalysisDateString"].Value.ToString();
 
             List<AnalysisTable> AnalysisTableList = new List<AnalysisTable>
             {
@@ -231,20 +223,72 @@ namespace analyzer
 
             dataGrid.ItemsSource = AnalysisTableList;
 
-            DataGridColumn columnToChangeHeader = dataGrid.Columns[0]; // Индекс столбца, который вы хотите изменить
-            columnToChangeHeader.Header = "Total number of tables in the db";
 
 
-            columnToChangeHeader = dataGrid.Columns[1];
-            columnToChangeHeader.Header = "size of db on disk (in MB)";
 
-            columnToChangeHeader = dataGrid.Columns[2];
-            columnToChangeHeader.Header = "date of analysis";
 
+            renameTableHeader(0, "Total number of tables in the db");
+            renameTableHeader(1, "size of db on disk (in MB)");
+            renameTableHeader(2, "date of analysis");
+
+
+        }
+
+        void renameTableHeader(int ind, string newName)
+        {
+            DataGridColumn columnToChangeHeader = dataGrid.Columns[ind]; // Индекс столбца, который вы хотите изменить
+            columnToChangeHeader.Header = newName;
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
+            //string tableName =  "Analyz" +  connSql.Database;
+            string createProcedureSql = @"
+    IF NOT EXISTS (SELECT * FROM sys.procedures WHERE name = 'CreateAnalyzTable')
+    BEGIN
+        EXEC('
+        CREATE PROCEDURE CreateAnalyzTable
+            @TableCountString NVARCHAR(MAX),
+            @DbSizeString NVARCHAR(MAX),
+            @AnalysisDateString NVARCHAR(MAX)
+            AS
+            BEGIN
+                IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ''AnalyzKKK'')
+                BEGIN
+                    CREATE TABLE [dbo].[AnalyzKKK] (
+                        TableCountString NVARCHAR(MAX),
+                        DbSizeString NVARCHAR(MAX),
+                        AnalysisDateString NVARCHAR(MAX)
+                    );
+                END;
+
+                -- Вставка данных
+                INSERT INTO [dbo].[AnalyzKKK] (TableCountString, DbSizeString, AnalysisDateString)
+                VALUES (@TableCountString, @DbSizeString, @AnalysisDateString);
+            END;
+        ');
+    END";
+
+            SqlCommand createProcedureCommand = new SqlCommand(createProcedureSql, connSql);
+            createProcedureCommand.ExecuteNonQuery();
+
+            // Вызвать процедуру
+            SqlCommand callProcedureCommand = new SqlCommand("CreateAnalyzTable", connSql);
+            callProcedureCommand.CommandType = CommandType.StoredProcedure;
+
+            callProcedureCommand.Parameters.AddWithValue("@TableCountString", TableCountString);
+            callProcedureCommand.Parameters.AddWithValue("@DbSizeString", DbSizeString);
+            callProcedureCommand.Parameters.AddWithValue("@AnalysisDateString", AnalysisDateString);
+
+            callProcedureCommand.ExecuteNonQuery();
+
+
+
+            //MessageBox.Show($"{connSql.Database}");
+
+
+
+
 
         }
     }
