@@ -36,6 +36,7 @@ namespace analyzer
         string TableCountString = "";
         string DbSizeString = "";
         string AnalysisDateString = "";
+        string tableName = "Analyz";
         public MainWindow()
         {
             InitializeComponent();
@@ -156,6 +157,21 @@ namespace analyzer
 
         private void Analyz_Click(object sender, RoutedEventArgs e)
         {
+            if (serverOutput == "Sql Srever")
+            {
+                AnalyzSql();
+            }
+            else if (serverOutput == "My Sql Srever")
+            {
+                AnalyzMySql();
+            }
+
+
+
+        }
+
+        void AnalyzSql()
+        {
             
             string ComText = @"
             IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[AnalyzeDatabase]') AND type in (N'P', N'PC'))
@@ -193,7 +209,7 @@ namespace analyzer
                 Connection = connSql,
             };
 
-           command1.ExecuteNonQuery();
+            command1.ExecuteNonQuery();
 
 
             // для вызова процедуры AnalyzeDatabase
@@ -231,6 +247,82 @@ namespace analyzer
             renameTableHeader(1, "size of db on disk (in MB)");
             renameTableHeader(2, "date of analysis");
 
+            tableName = "Analyz" + "_" + connSql.Database;
+
+        }
+
+        void AnalyzMySql()
+        {
+           
+
+            string ComText = @"
+CREATE PROCEDURE IF NOT EXISTS AnalyzeDatabase(
+    OUT TableCountString VARCHAR(10),
+    OUT DbSizeString VARCHAR(20),
+    OUT AnalysisDateString VARCHAR(50)
+)
+BEGIN
+    -- Общее количество таблиц в текущей схеме базы данных
+    SELECT COUNT(*) INTO TableCountString
+    FROM information_schema.tables
+    WHERE table_type = 'BASE TABLE' AND table_schema = DATABASE();
+    
+    -- Размер базы данных на диске
+    SELECT SUM(data_length + index_length) / 1024 / 1024 INTO DbSizeString
+    FROM information_schema.tables
+    WHERE table_type = 'BASE TABLE' AND table_schema = DATABASE();
+    
+    -- Дата анализа (текущее время)
+    SET AnalysisDateString = NOW();
+END;
+";
+
+            MySqlCommand command1 = new MySqlCommand()
+            {
+                CommandText = ComText,
+                Connection = MySqlConnection,
+            };
+
+            command1.ExecuteNonQuery();
+
+
+            // для вызова процедуры AnalyzeDatabase
+            MySqlCommand command2 = new MySqlCommand("AnalyzeDatabase", MySqlConnection);
+            command2.CommandType = CommandType.StoredProcedure;
+
+            // параметры OUTPUT
+            command2.Parameters.Add(new MySqlParameter("@TableCountString", MySqlDbType.VarChar, 10) { Direction = ParameterDirection.Output });
+            command2.Parameters.Add(new MySqlParameter("@DbSizeString", MySqlDbType.VarChar, 20) { Direction = ParameterDirection.Output });
+            command2.Parameters.Add(new MySqlParameter("@AnalysisDateString", MySqlDbType.VarChar, 50) { Direction = ParameterDirection.Output });
+
+
+            // Выполнение процедуры
+            command2.ExecuteNonQuery();
+
+            TableCountString = command2.Parameters["@TableCountString"].Value.ToString();
+            DbSizeString = command2.Parameters["@DbSizeString"].Value.ToString();
+            AnalysisDateString = command2.Parameters["@AnalysisDateString"].Value.ToString();
+
+            List<AnalysisTable> AnalysisTableList = new List<AnalysisTable>
+            {
+                new AnalysisTable { Column1 = TableCountString,
+                    Column2 = DbSizeString,
+                    Column3 = AnalysisDateString},
+
+            };
+
+            dataGrid.ItemsSource = AnalysisTableList;
+
+
+
+
+
+            renameTableHeader(0, "Total number of tables in the db");
+            renameTableHeader(1, "size of db on disk (in MB)");
+            renameTableHeader(2, "date of analysis");
+
+            MySqlCommand command = new MySqlCommand("SELECT DATABASE();", MySqlConnection);
+            tableName = "Analyz" + "_" + command.ExecuteScalar().ToString();
 
         }
 
@@ -250,104 +342,73 @@ namespace analyzer
             {
                 SaveinMySql();
             }
-            //MessageBox.Show($"{connSql.Database}");
-
-
-
-
+           
 
         }
 
 
         void SaveinSql()
         {
-            string tableName = "Analyz" + connSql.Database;
-            string createProcedureSql = $@"
-            IF NOT EXISTS (SELECT * FROM sys.procedures WHERE name = 'CreateAnalyzTable')
-            BEGIN
-                EXEC('
-                CREATE PROCEDURE CreateAnalyzTable
-                    @TableCountString NVARCHAR(MAX),
-                    @DbSizeString NVARCHAR(MAX),
-                    @AnalysisDateString NVARCHAR(MAX)
-                    AS
-                    BEGIN
-                        IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ''{tableName}'')
-                        BEGIN
-                            CREATE TABLE [dbo].[{tableName}] (
-                                TableCountString NVARCHAR(MAX),
-                                DbSizeString NVARCHAR(MAX),
-                                AnalysisDateString NVARCHAR(MAX)
-                            );
-                        END;
-        
-                        -- Вставка данных
-                        INSERT INTO [dbo].[{tableName}] (TableCountString, DbSizeString, AnalysisDateString)
-                        VALUES (@TableCountString, @DbSizeString, @AnalysisDateString);
-                    END;
-                ');
-            END";
+            
+            string SqlCom = $@"
+    IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{tableName}')
+    BEGIN
+        CREATE TABLE {tableName} (
+            TableCountString NVARCHAR(MAX),
+            DbSizeString NVARCHAR(MAX),
+            AnalysisDateString NVARCHAR(MAX)
+        );
+    END;
 
-            // создать процедуру если ее не существует
-            SqlCommand createProcedureCommand = new SqlCommand(createProcedureSql, connSql);
-            createProcedureCommand.ExecuteNonQuery();
-
-            // Вызвать процедуру
-            SqlCommand callProcedureCommand = new SqlCommand("CreateAnalyzTable", connSql);
-            callProcedureCommand.CommandType = CommandType.StoredProcedure;
-
-            callProcedureCommand.Parameters.AddWithValue("@TableCountString", TableCountString);
-            callProcedureCommand.Parameters.AddWithValue("@DbSizeString", DbSizeString);
-            callProcedureCommand.Parameters.AddWithValue("@AnalysisDateString", AnalysisDateString);
-
-            callProcedureCommand.ExecuteNonQuery();
+    -- Вставка данных
+    INSERT INTO {tableName} (TableCountString, DbSizeString, AnalysisDateString)
+    VALUES (@TableCountString, @DbSizeString, @AnalysisDateString);
+";
 
 
+            SqlCommand callCommand = new SqlCommand(SqlCom, connSql);
+
+            callCommand.Parameters.AddWithValue("@TableCountString", TableCountString);
+            callCommand.Parameters.AddWithValue("@DbSizeString", DbSizeString);
+            callCommand.Parameters.AddWithValue("@AnalysisDateString", AnalysisDateString);
+
+            callCommand.ExecuteNonQuery();
+
+            MessageBox.Show($"data saved to table {tableName}");
         }
 
         void SaveinMySql()
         {
-            string tableName = "Analyz" + connSql.Database;
-            string createProcedureSql = $@"
-            CREATE PROCEDURE CreateAnalyzTable(
-                IN TableCountString TEXT,
-                IN DbSizeString TEXT,
-                IN AnalysisDateString TEXT
-            )
-            BEGIN
-                DECLARE tableNameExists INT;
-                SELECT COUNT(*) INTO tableNameExists FROM information_schema.tables WHERE table_name = '{tableName}';
-                IF tableNameExists = 0 THEN
-                    CREATE TABLE {tableName} (
-                        TableCountString TEXT,
-                        DbSizeString TEXT,
-                        AnalysisDateString TEXT
-                    );
-                END IF;
+            
+            string createTableSql = $@"
+            CREATE TABLE IF NOT EXISTS {tableName} (
+                TableCount TEXT,
+                DbSize TEXT,
+                AnalysisDate TEXT
+            )";
+            MySqlCommand createTableCommand = new MySqlCommand(createTableSql, MySqlConnection);
+            createTableCommand.ExecuteNonQuery();
 
-                -- Вставка данных
-                INSERT INTO {tableName} (TableCountString, DbSizeString, AnalysisDateString)
-                VALUES (TableCountString, DbSizeString, AnalysisDateString);
-            END;
-";
 
-            // создать процедуру если ее не существует
-            MySqlCommand createProcedureCommand = new MySqlCommand(createProcedureSql, MySqlConnection);
-            createProcedureCommand.ExecuteNonQuery();
+            string insertDataSql = $@"
+        INSERT INTO {tableName} (TableCount, DbSize, AnalysisDate)
+        VALUES (@TableCountString, @DbSizeString, @AnalysisDateString)";
+
+
 
             // Вызвать процедуру
-            MySqlCommand callProcedureCommand = new MySqlCommand("CreateAnalyzTable", MySqlConnection);
-            callProcedureCommand.CommandType = CommandType.StoredProcedure;
+            MySqlCommand insertDataCommand = new MySqlCommand(insertDataSql, MySqlConnection);
 
-            callProcedureCommand.Parameters.AddWithValue("@TableCountString", TableCountString);
-            callProcedureCommand.Parameters.AddWithValue("@DbSizeString", DbSizeString);
-            callProcedureCommand.Parameters.AddWithValue("@AnalysisDateString", AnalysisDateString);
+            insertDataCommand.Parameters.AddWithValue("@TableCountString", TableCountString);
+            insertDataCommand.Parameters.AddWithValue("@DbSizeString", DbSizeString);
+            insertDataCommand.Parameters.AddWithValue("@AnalysisDateString", AnalysisDateString);
 
-            callProcedureCommand.ExecuteNonQuery();
+            insertDataCommand.ExecuteNonQuery();
 
+            MessageBox.Show($"data saved to table {tableName}");
 
         }
 
-
+       
     }
 }
