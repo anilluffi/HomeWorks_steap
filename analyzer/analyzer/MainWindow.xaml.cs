@@ -242,33 +242,53 @@ namespace analyzer
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
-            //string tableName =  "Analyz" +  connSql.Database;
-            string createProcedureSql = @"
-    IF NOT EXISTS (SELECT * FROM sys.procedures WHERE name = 'CreateAnalyzTable')
-    BEGIN
-        EXEC('
-        CREATE PROCEDURE CreateAnalyzTable
-            @TableCountString NVARCHAR(MAX),
-            @DbSizeString NVARCHAR(MAX),
-            @AnalysisDateString NVARCHAR(MAX)
-            AS
+            if (serverInput == "Sql Srever")
+            {
+                SaveinSql();
+            }
+            else if (serverInput == "My Sql Srever")
+            {
+                SaveinMySql();
+            }
+            //MessageBox.Show($"{connSql.Database}");
+
+
+
+
+
+        }
+
+
+        void SaveinSql()
+        {
+            string tableName = "Analyz" + connSql.Database;
+            string createProcedureSql = $@"
+            IF NOT EXISTS (SELECT * FROM sys.procedures WHERE name = 'CreateAnalyzTable')
             BEGIN
-                IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ''AnalyzKKK'')
-                BEGIN
-                    CREATE TABLE [dbo].[AnalyzKKK] (
-                        TableCountString NVARCHAR(MAX),
-                        DbSizeString NVARCHAR(MAX),
-                        AnalysisDateString NVARCHAR(MAX)
-                    );
-                END;
+                EXEC('
+                CREATE PROCEDURE CreateAnalyzTable
+                    @TableCountString NVARCHAR(MAX),
+                    @DbSizeString NVARCHAR(MAX),
+                    @AnalysisDateString NVARCHAR(MAX)
+                    AS
+                    BEGIN
+                        IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ''{tableName}'')
+                        BEGIN
+                            CREATE TABLE [dbo].[{tableName}] (
+                                TableCountString NVARCHAR(MAX),
+                                DbSizeString NVARCHAR(MAX),
+                                AnalysisDateString NVARCHAR(MAX)
+                            );
+                        END;
+        
+                        -- Вставка данных
+                        INSERT INTO [dbo].[{tableName}] (TableCountString, DbSizeString, AnalysisDateString)
+                        VALUES (@TableCountString, @DbSizeString, @AnalysisDateString);
+                    END;
+                ');
+            END";
 
-                -- Вставка данных
-                INSERT INTO [dbo].[AnalyzKKK] (TableCountString, DbSizeString, AnalysisDateString)
-                VALUES (@TableCountString, @DbSizeString, @AnalysisDateString);
-            END;
-        ');
-    END";
-
+            // создать процедуру если ее не существует
             SqlCommand createProcedureCommand = new SqlCommand(createProcedureSql, connSql);
             createProcedureCommand.ExecuteNonQuery();
 
@@ -283,13 +303,51 @@ namespace analyzer
             callProcedureCommand.ExecuteNonQuery();
 
 
+        }
 
-            //MessageBox.Show($"{connSql.Database}");
+        void SaveinMySql()
+        {
+            string tableName = "Analyz" + connSql.Database;
+            string createProcedureSql = $@"
+            CREATE PROCEDURE CreateAnalyzTable(
+                IN TableCountString TEXT,
+                IN DbSizeString TEXT,
+                IN AnalysisDateString TEXT
+            )
+            BEGIN
+                DECLARE tableNameExists INT;
+                SELECT COUNT(*) INTO tableNameExists FROM information_schema.tables WHERE table_name = '{tableName}';
+                IF tableNameExists = 0 THEN
+                    CREATE TABLE {tableName} (
+                        TableCountString TEXT,
+                        DbSizeString TEXT,
+                        AnalysisDateString TEXT
+                    );
+                END IF;
 
+                -- Вставка данных
+                INSERT INTO {tableName} (TableCountString, DbSizeString, AnalysisDateString)
+                VALUES (TableCountString, DbSizeString, AnalysisDateString);
+            END;
+";
 
+            // создать процедуру если ее не существует
+            MySqlCommand createProcedureCommand = new MySqlCommand(createProcedureSql, MySqlConnection);
+            createProcedureCommand.ExecuteNonQuery();
 
+            // Вызвать процедуру
+            MySqlCommand callProcedureCommand = new MySqlCommand("CreateAnalyzTable", MySqlConnection);
+            callProcedureCommand.CommandType = CommandType.StoredProcedure;
+
+            callProcedureCommand.Parameters.AddWithValue("@TableCountString", TableCountString);
+            callProcedureCommand.Parameters.AddWithValue("@DbSizeString", DbSizeString);
+            callProcedureCommand.Parameters.AddWithValue("@AnalysisDateString", AnalysisDateString);
+
+            callProcedureCommand.ExecuteNonQuery();
 
 
         }
+
+
     }
 }
