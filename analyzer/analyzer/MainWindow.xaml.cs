@@ -28,7 +28,7 @@ namespace analyzer
     {
 
         SqlConnection_ SqlConn = new SqlConnection_();
-        MySqlConnection_ MySqlConn= new MySqlConnection_();
+        MySqlConnection_ MySqlConn = new MySqlConnection_();
         SqlConnection connSql = new SqlConnection();
         MySqlConnection MySqlConnection = new MySqlConnection();
         string serverOutput = "";
@@ -60,10 +60,10 @@ namespace analyzer
             server = comboBox.SelectedItem.ToString();
             if (server == "Sql Srever")
             {
-                
+
                 SqlConn = new SqlConnection_("SqlSrever");
 
-                if(comboBox == FromServer)
+                if (comboBox == FromServer)
                 {
                     connSql = await SqlConn.OpenConnectionAsync(connSql);
                     SqlConn.ComboBoxFiller(dbForAnalysis, connSql);
@@ -78,7 +78,7 @@ namespace analyzer
             }
             else if (server == "My Sql Srever")
             {
-                MySqlConn = new MySqlConnection_("MySqlSrever"); 
+                MySqlConn = new MySqlConnection_("MySqlSrever");
                 if (comboBox == FromServer)
                 {
                     MySqlConnection = await MySqlConn.MySqlOpenConnectionAsync(MySqlConnection);
@@ -106,7 +106,7 @@ namespace analyzer
             else if (server == "My Sql Srever")
             {
                 MySqlConnection = await MySqlConn.DbConnectionAsync(comboBox, MySqlConnection);
-                
+
             }
 
 
@@ -116,12 +116,12 @@ namespace analyzer
             //    MessageBox.Show($"Connected to database: {currentDatabase}");
             //}
         }
-        
+
         public async void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (sender is ComboBox comboBox)
             {
-                serverOutput = await con(comboBox,  serverOutput);
+                serverOutput = await con(comboBox, serverOutput);
             }
 
         }
@@ -129,7 +129,7 @@ namespace analyzer
         private async void ServerSave_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (sender is ComboBox comboBox)
-            { serverInput = await con(comboBox,  serverInput); }
+            { serverInput = await con(comboBox, serverInput); }
         }
         private void ComboBox_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
         {
@@ -144,8 +144,8 @@ namespace analyzer
             if (sender is ComboBox comboBox)
             {
                 f(comboBox, serverInput);
-               
-                
+
+
             }
 
         }
@@ -170,9 +170,34 @@ namespace analyzer
 
         }
 
+        /// <summary>
+        /// /////////////////////////////
+        /// </summary>
         void AnalyzSql()
         {
-            
+
+            //            string ComText = @"
+            //    DECLARE @TableCount INT; -- Объявление и инициализация TableCountString
+            //    DECLARE @DbSizeMB FLOAT; -- Объявление и инициализация DbSizeString
+            //    DECLARE @AnalysisDate VARCHAR(50); -- Объявление и инициализация AnalysisDateString
+
+            //    -- Общее количество таблиц в базе данных
+            //    DECLARE @TableCount INT
+            //    SELECT @TableCount = COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'
+
+            //    -- Размер базы данных на диске
+            //    DECLARE @DbSizeMB FLOAT
+            //    SET @DbSizeMB = (SELECT SUM(size * 8.0 / 1024) FROM sys.master_files WHERE type = 0)
+
+            //    -- Дата анализа (текущее время)
+            //    SET @AnalysisDate = CONVERT(VARCHAR(50), GETDATE(), 120)
+
+            //    -- Присваиваем результаты анализа переменным OUTPUT
+            //    SET @TableCountString = CAST(@TableCount AS VARCHAR(10))
+            //    SET @DbSizeString = CAST(@DbSizeMB AS VARCHAR(20))
+            //    SET @AnalysisDateString = @AnalysisDate
+            //";
+
             string ComText = @"
             IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[AnalyzeDatabase]') AND type in (N'P', N'PC'))
             BEGIN
@@ -202,32 +227,24 @@ namespace analyzer
                 END')
             END
             ";
-
-            SqlCommand command1 = new SqlCommand()
+            SqlCommand command = new SqlCommand()
             {
                 CommandText = ComText,
                 Connection = connSql,
             };
 
-            command1.ExecuteNonQuery();
-
-
-            // для вызова процедуры AnalyzeDatabase
-            SqlCommand command2 = new SqlCommand("AnalyzeDatabase", connSql);
-            command2.CommandType = CommandType.StoredProcedure;
-
             //параметры OUTPUT для получения результатов
-            command2.Parameters.Add(new SqlParameter("@TableCountString", SqlDbType.VarChar, -1) { Direction = ParameterDirection.Output });
-            command2.Parameters.Add(new SqlParameter("@DbSizeString", SqlDbType.VarChar, -1) { Direction = ParameterDirection.Output });
-            command2.Parameters.Add(new SqlParameter("@AnalysisDateString", SqlDbType.VarChar, -1) { Direction = ParameterDirection.Output });
-
+            command.Parameters.Add(new SqlParameter("@TableCountString", SqlDbType.VarChar, -1) { Direction = ParameterDirection.Output });
+            command.Parameters.Add(new SqlParameter("@DbSizeString", SqlDbType.VarChar, -1) { Direction = ParameterDirection.Output });
+            command.Parameters.Add(new SqlParameter("@AnalysisDateString", SqlDbType.VarChar, -1) { Direction = ParameterDirection.Output });
 
             // Выполнение процедуры
-            command2.ExecuteNonQuery();
+            command.ExecuteNonQuery();
 
-            TableCountString = command2.Parameters["@TableCountString"].Value.ToString();
-            DbSizeString = command2.Parameters["@DbSizeString"].Value.ToString();
-            AnalysisDateString = command2.Parameters["@AnalysisDateString"].Value.ToString();
+            TableCountString = command.Parameters["@TableCountString"].Value.ToString();
+            DbSizeString = command.Parameters["@DbSizeString"].Value.ToString();
+            AnalysisDateString = command.Parameters["@AnalysisDateString"].Value.ToString();
+
 
             List<AnalysisTable> AnalysisTableList = new List<AnalysisTable>
             {
@@ -253,55 +270,48 @@ namespace analyzer
 
         void AnalyzMySql()
         {
-           
+
 
             string ComText = @"
-CREATE PROCEDURE IF NOT EXISTS AnalyzeDatabase(
-    OUT TableCountString VARCHAR(10),
-    OUT DbSizeString VARCHAR(20),
-    OUT AnalysisDateString VARCHAR(50)
-)
-BEGIN
+    SET @TableCountString = 0; -- Объявление и инициализация TableCountString
+    SET @DbSizeString = 0;    -- Объявление и инициализация DbSizeString
+    SET @AnalysisDateString = NOW(); -- Объявление и инициализация AnalysisDateString
+
     -- Общее количество таблиц в текущей схеме базы данных
-    SELECT COUNT(*) INTO TableCountString
+    SELECT COUNT(*) INTO @TableCountString
     FROM information_schema.tables
     WHERE table_type = 'BASE TABLE' AND table_schema = DATABASE();
-    
+
     -- Размер базы данных на диске
-    SELECT SUM(data_length + index_length) / 1024 / 1024 INTO DbSizeString
+    SELECT SUM(data_length + index_length) / 1024 / 1024 INTO @DbSizeString
     FROM information_schema.tables
     WHERE table_type = 'BASE TABLE' AND table_schema = DATABASE();
-    
+
     -- Дата анализа (текущее время)
-    SET AnalysisDateString = NOW();
-END;
+    SET @AnalysisDateString = NOW();
 ";
 
-            MySqlCommand command1 = new MySqlCommand()
+            MySqlCommand command = new MySqlCommand()
             {
                 CommandText = ComText,
                 Connection = MySqlConnection,
             };
 
-            command1.ExecuteNonQuery();
 
 
-            // для вызова процедуры AnalyzeDatabase
-            MySqlCommand command2 = new MySqlCommand("AnalyzeDatabase", MySqlConnection);
-            command2.CommandType = CommandType.StoredProcedure;
 
             // параметры OUTPUT
-            command2.Parameters.Add(new MySqlParameter("@TableCountString", MySqlDbType.VarChar, 10) { Direction = ParameterDirection.Output });
-            command2.Parameters.Add(new MySqlParameter("@DbSizeString", MySqlDbType.VarChar, 20) { Direction = ParameterDirection.Output });
-            command2.Parameters.Add(new MySqlParameter("@AnalysisDateString", MySqlDbType.VarChar, 50) { Direction = ParameterDirection.Output });
+            command.Parameters.Add(new MySqlParameter("@TableCountString", MySqlDbType.VarChar, 10) { Direction = ParameterDirection.Output });
+            command.Parameters.Add(new MySqlParameter("@DbSizeString", MySqlDbType.VarChar, 20) { Direction = ParameterDirection.Output });
+            command.Parameters.Add(new MySqlParameter("@AnalysisDateString", MySqlDbType.VarChar, 50) { Direction = ParameterDirection.Output });
 
 
-            // Выполнение процедуры
-            command2.ExecuteNonQuery();
+            // Выполнение
+            command.ExecuteNonQuery();
 
-            TableCountString = command2.Parameters["@TableCountString"].Value.ToString();
-            DbSizeString = command2.Parameters["@DbSizeString"].Value.ToString();
-            AnalysisDateString = command2.Parameters["@AnalysisDateString"].Value.ToString();
+            TableCountString = command.Parameters["@TableCountString"].Value.ToString();
+            DbSizeString = command.Parameters["@DbSizeString"].Value.ToString();
+            AnalysisDateString = command.Parameters["@AnalysisDateString"].Value.ToString();
 
             List<AnalysisTable> AnalysisTableList = new List<AnalysisTable>
             {
@@ -321,8 +331,8 @@ END;
             renameTableHeader(1, "size of db on disk (in MB)");
             renameTableHeader(2, "date of analysis");
 
-            MySqlCommand command = new MySqlCommand("SELECT DATABASE();", MySqlConnection);
-            tableName = "Analyz" + "_" + command.ExecuteScalar().ToString();
+            MySqlCommand command1 = new MySqlCommand("SELECT DATABASE();", MySqlConnection);
+            tableName = "Analyz" + "_" + command1.ExecuteScalar().ToString();
 
         }
 
@@ -342,13 +352,6 @@ END;
             {
                 SaveinMySql();
             }
-<<<<<<< HEAD
-           
-=======
-            //MessageBox.Show($"{connSql.Database}");
-
-
-
 
 
         }
@@ -356,99 +359,7 @@ END;
 
         void SaveinSql()
         {
-            string tableName = "Analyz" + connSql.Database;
-            string createProcedureSql = $@"
-            IF NOT EXISTS (SELECT * FROM sys.procedures WHERE name = 'CreateAnalyzTable')
-            BEGIN
-                EXEC('
-                CREATE PROCEDURE CreateAnalyzTable
-                    @TableCountString NVARCHAR(MAX),
-                    @DbSizeString NVARCHAR(MAX),
-                    @AnalysisDateString NVARCHAR(MAX)
-                    AS
-                    BEGIN
-                        IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ''{tableName}'')
-                        BEGIN
-                            CREATE TABLE [dbo].[{tableName}] (
-                                TableCountString NVARCHAR(MAX),
-                                DbSizeString NVARCHAR(MAX),
-                                AnalysisDateString NVARCHAR(MAX)
-                            );
-                        END;
-        
-                        -- Вставка данных
-                        INSERT INTO [dbo].[{tableName}] (TableCountString, DbSizeString, AnalysisDateString)
-                        VALUES (@TableCountString, @DbSizeString, @AnalysisDateString);
-                    END;
-                ');
-            END";
 
-            // создать процедуру если ее не существует
-            SqlCommand createProcedureCommand = new SqlCommand(createProcedureSql, connSql);
-            createProcedureCommand.ExecuteNonQuery();
-
-            // Вызвать процедуру
-            SqlCommand callProcedureCommand = new SqlCommand("CreateAnalyzTable", connSql);
-            callProcedureCommand.CommandType = CommandType.StoredProcedure;
-
-            callProcedureCommand.Parameters.AddWithValue("@TableCountString", TableCountString);
-            callProcedureCommand.Parameters.AddWithValue("@DbSizeString", DbSizeString);
-            callProcedureCommand.Parameters.AddWithValue("@AnalysisDateString", AnalysisDateString);
-
-            callProcedureCommand.ExecuteNonQuery();
-
-
-        }
-
-        void SaveinMySql()
-        {
-            string tableName = "Analyz" + connSql.Database;
-            string createProcedureSql = $@"
-            CREATE PROCEDURE CreateAnalyzTable(
-                IN TableCountString TEXT,
-                IN DbSizeString TEXT,
-                IN AnalysisDateString TEXT
-            )
-            BEGIN
-                DECLARE tableNameExists INT;
-                SELECT COUNT(*) INTO tableNameExists FROM information_schema.tables WHERE table_name = '{tableName}';
-                IF tableNameExists = 0 THEN
-                    CREATE TABLE {tableName} (
-                        TableCountString TEXT,
-                        DbSizeString TEXT,
-                        AnalysisDateString TEXT
-                    );
-                END IF;
-
-                -- Вставка данных
-                INSERT INTO {tableName} (TableCountString, DbSizeString, AnalysisDateString)
-                VALUES (TableCountString, DbSizeString, AnalysisDateString);
-            END;
-";
-
-            // создать процедуру если ее не существует
-            MySqlCommand createProcedureCommand = new MySqlCommand(createProcedureSql, MySqlConnection);
-            createProcedureCommand.ExecuteNonQuery();
-
-            // Вызвать процедуру
-            MySqlCommand callProcedureCommand = new MySqlCommand("CreateAnalyzTable", MySqlConnection);
-            callProcedureCommand.CommandType = CommandType.StoredProcedure;
-
-            callProcedureCommand.Parameters.AddWithValue("@TableCountString", TableCountString);
-            callProcedureCommand.Parameters.AddWithValue("@DbSizeString", DbSizeString);
-            callProcedureCommand.Parameters.AddWithValue("@AnalysisDateString", AnalysisDateString);
-
-            callProcedureCommand.ExecuteNonQuery();
-
->>>>>>> 18fdfb51a302ecfd0f03d7f136a83fd68550e40e
-
-        }
-
-
-<<<<<<< HEAD
-        void SaveinSql()
-        {
-            
             string SqlCom = $@"
     IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{tableName}')
     BEGIN
@@ -478,7 +389,7 @@ END;
 
         void SaveinMySql()
         {
-            
+
             string createTableSql = $@"
             CREATE TABLE IF NOT EXISTS {tableName} (
                 TableCount TEXT,
@@ -494,8 +405,6 @@ END;
         VALUES (@TableCountString, @DbSizeString, @AnalysisDateString)";
 
 
-
-            // Вызвать процедуру
             MySqlCommand insertDataCommand = new MySqlCommand(insertDataSql, MySqlConnection);
 
             insertDataCommand.Parameters.AddWithValue("@TableCountString", TableCountString);
@@ -508,8 +417,6 @@ END;
 
         }
 
-       
-=======
->>>>>>> 18fdfb51a302ecfd0f03d7f136a83fd68550e40e
+
     }
 }
