@@ -170,80 +170,41 @@ namespace analyzer
 
         }
 
-        /// <summary>
-        /// /////////////////////////////
-        /// </summary>
+
         void AnalyzSql()
         {
 
-            //            string ComText = @"
-            //    DECLARE @TableCount INT; -- Объявление и инициализация TableCountString
-            //    DECLARE @DbSizeMB FLOAT; -- Объявление и инициализация DbSizeString
-            //    DECLARE @AnalysisDate VARCHAR(50); -- Объявление и инициализация AnalysisDateString
-
-            //    -- Общее количество таблиц в базе данных
-            //    DECLARE @TableCount INT
-            //    SELECT @TableCount = COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'
-
-            //    -- Размер базы данных на диске
-            //    DECLARE @DbSizeMB FLOAT
-            //    SET @DbSizeMB = (SELECT SUM(size * 8.0 / 1024) FROM sys.master_files WHERE type = 0)
-
-            //    -- Дата анализа (текущее время)
-            //    SET @AnalysisDate = CONVERT(VARCHAR(50), GETDATE(), 120)
-
-            //    -- Присваиваем результаты анализа переменным OUTPUT
-            //    SET @TableCountString = CAST(@TableCount AS VARCHAR(10))
-            //    SET @DbSizeString = CAST(@DbSizeMB AS VARCHAR(20))
-            //    SET @AnalysisDateString = @AnalysisDate
-            //";
-
             string ComText = @"
-            IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[AnalyzeDatabase]') AND type in (N'P', N'PC'))
-            BEGIN
-                EXEC('
-                CREATE PROCEDURE AnalyzeDatabase
-                    @TableCountString VARCHAR(MAX) OUTPUT,
-                @DbSizeString VARCHAR(MAX) OUTPUT,
-                @AnalysisDateString VARCHAR(MAX) OUTPUT
-            AS
-            BEGIN
-                -- Общее количество таблиц в базе данных
-                DECLARE @TableCount INT
-                SELECT @TableCount = COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = ''BASE TABLE''
-        
-                -- Размер базы данных на диске
-                DECLARE @DbSizeMB FLOAT
-                SET @DbSizeMB = (SELECT SUM(size * 8.0 / 1024) FROM sys.master_files WHERE type = 0)
-        
-                -- Дата анализа (текущее время)
-                    DECLARE @AnalysisDate VARCHAR(50)
-                    SET @AnalysisDate = CONVERT(VARCHAR(50), GETDATE(), 120)
-            
-                    -- Присваиваем результаты анализа переменным OUTPUT
-                    SET @TableCountString = CAST(@TableCount AS VARCHAR(10))
-                    SET @DbSizeString = CAST(@DbSizeMB AS VARCHAR(20))
-                    SET @AnalysisDateString = @AnalysisDate
-                END')
-            END
+            -- Общее количество таблиц в текущей базе данных
+            SELECT @TableCount = COUNT(*)
+            FROM INFORMATION_SCHEMA.TABLES
+            WHERE TABLE_TYPE = 'BASE TABLE';
+
+            -- Размер базы данных на диске
+            SELECT @DbSize = SUM(size * 8.0 / 1024)
+            FROM sys.master_files
+            WHERE type = 0;
+
+            -- Дата анализа (текущее время)
+            SELECT @AnalysisDate = GETDATE();
             ";
-            SqlCommand command = new SqlCommand()
-            {
-                CommandText = ComText,
-                Connection = connSql,
-            };
 
-            //параметры OUTPUT для получения результатов
-            command.Parameters.Add(new SqlParameter("@TableCountString", SqlDbType.VarChar, -1) { Direction = ParameterDirection.Output });
-            command.Parameters.Add(new SqlParameter("@DbSizeString", SqlDbType.VarChar, -1) { Direction = ParameterDirection.Output });
-            command.Parameters.Add(new SqlParameter("@AnalysisDateString", SqlDbType.VarChar, -1) { Direction = ParameterDirection.Output });
 
-            // Выполнение процедуры
+
+            
+            SqlCommand command = new SqlCommand(ComText, connSql);
+
+            // Добавьте параметры для переменных
+            command.Parameters.Add(new SqlParameter("@TableCount", SqlDbType.Int) { Direction = ParameterDirection.Output });
+            command.Parameters.Add(new SqlParameter("@DbSize", SqlDbType.Float) { Direction = ParameterDirection.Output });
+            command.Parameters.Add(new SqlParameter("@AnalysisDate", SqlDbType.DateTime) { Direction = ParameterDirection.Output });
+
             command.ExecuteNonQuery();
 
-            TableCountString = command.Parameters["@TableCountString"].Value.ToString();
-            DbSizeString = command.Parameters["@DbSizeString"].Value.ToString();
-            AnalysisDateString = command.Parameters["@AnalysisDateString"].Value.ToString();
+            // Получите результаты из переменных
+            TableCountString = command.Parameters["@TableCount"].Value.ToString();
+            DbSizeString = command.Parameters["@DbSize"].Value.ToString();
+            AnalysisDateString = command.Parameters["@AnalysisDate"].Value.ToString();
 
 
             List<AnalysisTable> AnalysisTableList = new List<AnalysisTable>
